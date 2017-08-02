@@ -18,10 +18,10 @@
             this.DIFF_TIME = 0;
             this.TOOTS = null;
             this.createPlayButton();
-            this.addDblClickListener();
+            this.setDblClickListener();
         }
 
-        addDblClickListener() {
+        setDblClickListener() {
             const self = this;
             document.querySelector('.right_content').addEventListener('dblclick', function(e) {
                 self.restart(e);
@@ -45,7 +45,7 @@
 
             const buttonElem = document.querySelector('#play_button');
             if(this.MAIN_TIMER) { this.stop(buttonElem); }
-            
+
             this.start(buttonElem, startIndex);
         }
 
