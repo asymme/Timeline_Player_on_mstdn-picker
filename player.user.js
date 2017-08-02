@@ -1,13 +1,3 @@
-// ==UserScript==
-// @name         Timeline Player on mstdn-picker
-// @namespace    https://github.com/asymme/
-// @version      0.1
-// @description  It can play the same timeline as when live
-// @author       Asymme
-// @match        https://rbtnn.github.io/mstdn-picker/index.html*
-// @grant        none
-// ==/UserScript==
-
 (function() {
     'use strict';
     class Player {
@@ -18,19 +8,47 @@
             this.DIFF_TIME = 0;
             this.TOOTS = null;
             this.createPlayButton();
+            this.addDblClickListener();
+        }
+
+        addDblClickListener() {
+            const self = this;
+            document.querySelector('.right_content').addEventListener('dblclick', function(e) {
+                self.restart(e);
+            });
+        }
+
+        restart(e) {
+            this.TOOTS = document.querySelectorAll('.status-content');
+            const len = this.TOOTS.length;
+            if(len === 0) { return; }
+
+            let startIndex = -1;
+            for(let i = 0; i < len; i++) {
+                const avatarPos = this.TOOTS[i].querySelector('.status-avatar').getBoundingClientRect();
+                if(e.clientX >= avatarPos.left && e.clientX <= avatarPos.right && e.clientY >= avatarPos.top && e.clientY <= avatarPos.bottom) {
+                    startIndex = i;
+                    break;
+                }
+            }
+            if(startIndex < 0) { return; }
+
+            const buttonElem = document.querySelector('#play_button');
+            if(this.MAIN_TIMER) { this.stop(buttonElem); }
+            
+            this.start(buttonElem, startIndex);
         }
 
         createPlayButton() {
+            const self = this;
             const button = document.createElement('div');
             button.innerHTML = 'PLAY';
             button.setAttribute('class', 'button');
             button.setAttribute('id', 'play_button');
             button.style.cursor = 'pointer';
-            button.addEventListener('click', (function(self) {
-                return function(e) {
-                    self.pushButton(e.target);
-                };
-            })(this), false);
+            button.addEventListener('click', function(e) {
+                self.pushButton(e.target);
+            });
 
             const tr = document.createElement('tr');
             const td = document.createElement('td');
@@ -60,12 +78,15 @@
                     break;
                 }
             }
+            this.start(elem, startIndex);
+        }
 
+        start(elem, index) {
             elem.innerHTML = 'STOP';
-            const content = this.TOOTS[startIndex];
+            const content = this.TOOTS[index];
             this.DIFF_TIME = new Date().getTime() - Number(content.getAttribute('data-created_at'));
             this.HIDDEN_LENGTH = document.querySelectorAll('.status-hidden').length;
-            this.MAIN_TIMER = this.loop(startIndex);
+            this.MAIN_TIMER = this.loop(index);
             this.flash(null, content);
         }
 
