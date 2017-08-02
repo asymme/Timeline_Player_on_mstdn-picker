@@ -1,3 +1,13 @@
+// ==UserScript==
+// @name         Timeline Player on mstdn-picker
+// @namespace    https://github.com/asymme/
+// @version      0.1.1
+// @description  It can play the same timeline as when live
+// @author       Asymme
+// @match        https://rbtnn.github.io/mstdn-picker/index.html*
+// @grant        none
+// ==/UserScript==
+
 (function() {
     'use strict';
     class Player {
