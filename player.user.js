@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Timeline Player on mstdn-picker
 // @namespace    https://github.com/asymme/
-// @version      0.1.1
+// @version      0.1.2
 // @description  It can play the same timeline as when live
 // @author       Asymme
-// @match        https://rbtnn.github.io/mstdn-picker/index.html*
+// @match        https://rbtnn.github.io/mstdn-picker/*
 // @grant        none
 // ==/UserScript==
 
@@ -13,17 +13,17 @@
     class Player {
         constructor() {
             this.MAIN_TIMER = null;
-            this.RIGHT_HEADER = document.querySelector('.right_header');
+            this.RIGHT_HEADER = document.querySelector('#right_header');
             this.HIDDEN_LENGTH = 0;
             this.DIFF_TIME = 0;
             this.TOOTS = null;
             this.createPlayButton();
-            this.addDblClickListener();
+            this.setDblClickListener();
         }
 
-        addDblClickListener() {
+        setDblClickListener() {
             const self = this;
-            document.querySelector('.right_content').addEventListener('dblclick', function(e) {
+            document.querySelector('#right_content').addEventListener('dblclick', function(e) {
                 self.restart(e);
             });
         }
@@ -45,7 +45,7 @@
 
             const buttonElem = document.querySelector('#play_button');
             if(this.MAIN_TIMER) { this.stop(buttonElem); }
-            
+
             this.start(buttonElem, startIndex);
         }
 
@@ -96,22 +96,22 @@
             const content = this.TOOTS[index];
             this.DIFF_TIME = new Date().getTime() - Number(content.getAttribute('data-created_at'));
             this.HIDDEN_LENGTH = document.querySelectorAll('.status-hidden').length;
-            this.MAIN_TIMER = this.loop(index);
+            this.loop(index);
             this.flash(null, content);
         }
 
         loop(index) {
             const self = this;
-            return setTimeout(function() {
+            clearTimeout(self.MAIN_TIMER);
+            self.MAIN_TIMER = setTimeout(function() {
                 if(index === self.TOOTS.length - 1 || self.MAIN_TIMER === null || document.querySelectorAll('.status-hidden').length !== self.HIDDEN_LENGTH) {
                     self.stop(document.querySelector('#play_button'));
                     return;
                 }
 
-                clearTimeout(self.MAIN_TIMER);
                 const nextIndex = index + 1;
                 if(new Date().getTime() < Number(self.TOOTS[nextIndex].getAttribute('data-created_at')) + self.DIFF_TIME) {
-                    self.MAIN_TIMER = self.loop(index);
+                    self.loop(index);
                     return;
                 }
 
@@ -121,7 +121,7 @@
                 if(targetY > halfWindowHeight) {
                     self.scrollToNext(null, targetY + window.pageYOffset - halfWindowHeight, 1);
                 }
-                self.MAIN_TIMER = self.loop(nextIndex);
+                self.loop(nextIndex);
                 self.flash(null, content);
             }, 1000);
         }
